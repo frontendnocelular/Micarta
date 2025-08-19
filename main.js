@@ -81,7 +81,7 @@ function showCardWithAnimation() {
   const flowers = document.querySelector('.flowers');
   const countdown = document.getElementById('countdown');
   
-  if (overlay && card && skipButton) {
+  if (overlay && card) {
     // Esconde o contador regressivo
     if (countdown) {
       countdown.style.transition = 'all 0.5s ease-out';
@@ -92,11 +92,13 @@ function showCardWithAnimation() {
       }, 500);
     }
     
-    // Esconde o botão de pular com fade-out
-    skipButton.style.transition = 'all 0.5s ease-out';
-    skipButton.style.opacity = '0';
-    skipButton.style.transform = 'scale(0.8)';
-    skipButton.style.visibility = 'hidden';
+    // Esconde o botão de pular com fade-out (se existir)
+    if (skipButton) {
+      skipButton.style.transition = 'all 0.5s ease-out';
+      skipButton.style.opacity = '0';
+      skipButton.style.transform = 'scale(0.8)';
+      skipButton.style.visibility = 'hidden';
+    }
     
     // Adiciona efeito de fade-out nas flores com transição suave
     if (flowers) {
@@ -112,18 +114,26 @@ function showCardWithAnimation() {
     // Mostra o overlay com fade-in suave e blur
     overlay.style.transition = 'all 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
     overlay.classList.add('show');
+    // Força visibilidade
+    overlay.style.opacity = '1';
+    overlay.style.visibility = 'visible';
+    overlay.style.pointerEvents = 'auto';
     
     // Mostra a carta com animação dramática
     setTimeout(() => {
-      card.style.transition = 'all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      card.style.transition = 'all 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
       card.classList.add('show');
+      // Força visibilidade
+      card.style.opacity = '1';
+      card.style.transform = 'translate(-50%, -50%) scale(1)';
+      card.style.zIndex = '9999';
       
-      // Adiciona efeito de entrada especial
-      card.style.animation = 'cardEntrance 1.5s ease-out';
+      // Combina entrada + flutuação após entrada
+      card.style.animation = 'cardEntrance 0.9s ease-out, float 6s ease-in-out 0.9s infinite';
       
       // Adiciona efeito de brilho
       addCardGlow(card);
-    }, 800);
+    }, 300);
   }
 }
 
@@ -162,6 +172,9 @@ function goBack() {
     // Adiciona efeito de saída
     card.style.transform = 'translate(-50%, -50%) scale(0.8) rotate(5deg)';
     card.style.opacity = '0';
+    overlay.style.opacity = '0';
+    overlay.style.visibility = 'hidden';
+    overlay.style.pointerEvents = 'none';
     
     setTimeout(() => {
       window.location.href = 'index.html';
@@ -205,7 +218,7 @@ function addCountdown() {
     border-radius: 15px;
     backdrop-filter: blur(15px);
     border: 2px solid rgba(255, 255, 255, 0.3);
-    z-index: 1001;
+    z-index: 10001;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
