@@ -24,10 +24,23 @@
   </div>
   
   <div class="button">
-    <button>
-      <a href="flower.html">Clique aqui! 🌸</a>
+    <button onclick="goToFlowers()">
+      <span>Clique aqui! 🌸</span>
     </button>
   </div>
+
+  <script>
+    function goToFlowers() {
+      // Adiciona efeito de fade-out
+      document.body.style.transition = 'opacity 0.5s ease-out';
+      document.body.style.opacity = '0';
+      
+      // Redireciona após a transição
+      setTimeout(() => {
+        window.location.href = 'flower.html';
+      }, 500);
+    }
+  </script>
 </body>
 
 </html>

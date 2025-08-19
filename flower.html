@@ -8,6 +8,97 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="img/flowers.png" type="image/x-icon">
   <title>Flores Animadas</title>
+  <style>
+    .card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      color: white;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 1s ease-in-out;
+      max-width: 500px;
+      width: 90%;
+    }
+    
+    .card.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    
+    .card h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #39c6d6;
+    }
+    
+    .card p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    
+    .card button {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      border: none;
+      border-radius: 50px;
+      padding: 1rem 2rem;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s ease;
+    }
+    
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .skip-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      z-index: 1001;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .skip-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
 </head>
 
 <body class="container">
@@ -237,6 +328,27 @@
       <div class="leaf leaf--2"></div>
       <div class="leaf leaf--3"></div>
     </div>
+  </div>
+
+  <!-- Botão para pular animação -->
+  <button class="skip-button" onclick="showCard()">Pular para Carta</button>
+
+  <!-- Overlay para fundo escuro -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Carta que aparece após as flores -->
+  <div class="card" id="card">
+    <h2>💌 Para Você</h2>
+    <p>
+      Que estas flores possam trazer um pouco de alegria ao seu dia. 
+      Que cada pétala represente um momento especial e que a beleza 
+      da natureza inspire momentos de paz e felicidade em sua vida.
+    </p>
+    <p>
+      Que você sempre encontre beleza nas pequenas coisas e que 
+      seu coração floresça como um jardim cheio de cores e vida.
+    </p>
+    <button onclick="goBack()">Voltar ao Início</button>
   </div>
 
   <script src="main.js"></script>
