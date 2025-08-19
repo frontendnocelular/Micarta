@@ -1,108 +1,148 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,700;0,900;1,900&display=swap');
 
 * {
-  font-family: 'Poppins', cursive;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
 body {
-  color: azure;
+  color: #ffffff;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: black;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow-x: hidden;
 }
 
 .greetings {
-  font-size: 6rem;
+  font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 900;
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: fadeInDown 1s ease-out;
 }
 
-.greetings>span {
+.greetings > span {
+  display: inline-block;
   animation: glow 2.5s ease-in-out infinite;
+  margin: 0 0.2rem;
 }
 
 @keyframes glow {
-
-  0%,
-  100% {
-    color: #fff;
+  0%, 100% {
+    color: #ffffff;
     text-shadow: 0 0 12px #39c6d6, 0 0 50px #39c6d6, 0 0 100px #39c6d6;
+    transform: scale(1);
   }
-
-  10%,
-  90% {
-    color: #111;
-    text-shadow: none;
+  50% {
+    color: #39c6d6;
+    text-shadow: 0 0 20px #39c6d6, 0 0 60px #39c6d6, 0 0 120px #39c6d6;
+    transform: scale(1.1);
   }
 }
 
-.greetings>span:nth-child(2) {
-  animation-delay: .2s;
-}
-
-.greetings>span:nth-child(3) {
-  animation-delay: .4s;
-}
-
-.greetings>span:nth-child(4) {
-  animation-delay: .6s;
-}
-
-.greetings>span:nth-child(5) {
-  animation-delay: .8s;
-}
-
-.greetings>span:nth-child(6) {
-  animation-delay: 1s;
-}
-
-.greetings>span:nth-child(7) {
-  animation-delay: 1.2s;
-}
-
-.greetings>span:nth-child(8) {
-  animation-delay: 1.4s;
-}
-
-.greetings>span:nth-child(9) {
-  animation-delay: 1.6s;
-}
-
-greetings>span:nth-child(10) {
-  animation-delay: 1.8s;
-}
-
-.greetings>span:nth-child(11) {
-  animation-delay: 2s;
-}
+.greetings > span:nth-child(1) { animation-delay: 0.1s; }
+.greetings > span:nth-child(2) { animation-delay: 0.2s; }
+.greetings > span:nth-child(3) { animation-delay: 0.3s; }
+.greetings > span:nth-child(4) { animation-delay: 0.4s; }
+.greetings > span:nth-child(5) { animation-delay: 0.5s; }
 
 .description {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  margin-bottom: 3rem;
+  text-align: center;
+  opacity: 0;
+  animation: fadeInUp 1s ease-out 0.5s forwards;
+}
+
+.button {
+  opacity: 0;
+  animation: fadeInUp 1s ease-out 1s forwards;
+}
+
+.button button {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.button button:active {
+  transform: translateY(-1px);
 }
 
 .button a {
   text-decoration: none;
-  font-size: 1rem;
-  color: #111;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: block;
 }
 
-@media screen and (max-width:574px) {
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
   .greetings {
-    display: block;
-    font-size: 3rem;
-    font-weight: 500;
-    text-align: center;
+    margin-bottom: 1.5rem;
   }
-
+  
   .description {
-    font-size: 1rem;
+    margin-bottom: 2rem;
   }
+  
+  .button button {
+    padding: 0.8rem 1.5rem;
+  }
+}
 
+@media screen and (max-width: 480px) {
+  .greetings {
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    margin-bottom: 1.5rem;
+  }
+  
+  .button button {
+    padding: 0.7rem 1.2rem;
+  }
+  
   .button a {
-    font-size: .5rem;
+    font-size: 1rem;
   }
 }
