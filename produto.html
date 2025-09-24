@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Produto • Supremacy Baggy</title>
+  <meta name="description" content="Detalhes do produto Supremacy Baggy">
+  <style>
+    :root{--bg:#000;--fg:#fff;--muted:#bfbfbf;--card:#0b0b0b;--border:#151515}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#000;color:#fff;font-family:Inter,system-ui}
+    a{color:#fff;text-decoration:none}
+    img{max-width:100%;display:block}
+    .top{position:fixed;inset:0 0 auto 0;height:56px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #111;z-index:10}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.8px}
+    .brand img{width:32px;height:32px;border-radius:4px;filter:grayscale(1)}
+    .menu-btn{width:40px;height:40px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;display:grid;place-items:center}
+    .drawer{position:fixed;inset:56px 0 0 auto;width:80%;max-width:360px;background:#0a0a0a;border-left:1px solid #111;transform:translateX(100%);transition:transform .28s ease;z-index:20}
+    .drawer.open{transform:translateX(0)}
+    .drawer a{display:block;padding:16px;border-bottom:1px solid #111}
+    .spacer{height:56px}
+    .wrap{padding:16px;display:grid;gap:16px}
+    .gallery{display:grid;gap:10px}
+    .main-img{aspect-ratio:1/1;border:1px solid #151515;border-radius:12px;overflow:hidden;background:#0a0a0a}
+    .main-img img{width:100%;height:100%;object-fit:cover}
+    .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .thumbs img{width:100%;aspect-ratio:1/1;border:1px solid #151515;border-radius:10px;object-fit:cover;cursor:pointer;opacity:.8}
+    .thumbs img.active{opacity:1;box-shadow:0 0 0 2px #fff44}
+    .title{font-size:20px;font-weight:900;margin:4px 0}
+    .price{font-weight:800;font-size:18px}
+    .muted{color:#bfbfbf}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:8px 12px;border:1px solid #222;border-radius:999px;background:#0a0a0a;cursor:pointer}
+    .chip.active{border-color:#fff}
+    .qty{display:flex;align-items:center;gap:8px}
+    .qty button{width:36px;height:36px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff}
+    .buy{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #fff;background:#fff;color:#000;font-weight:900;margin-top:8px}
+    .video{aspect-ratio:16/9;border:1px solid #151515;border-radius:12px;overflow:hidden}
+  </style>
+  </head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="https://i.imgur.com/ZMOggly.png" alt="Logo"><span>SUPREMACY BAGGY</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">≡</button>
+  </header>
+  <nav class="drawer" id="drawer" aria-label="Navegação">
+    <a href="/paginahome.html">Home</a>
+    <a href="/categorias.html">Categorias</a>
+    <a href="/favoritos.html">Favoritos</a>
+    <a href="/carrinho.html">Carrinho</a>
+    <a href="/perfil.html">Perfil</a>
+    <a href="/paineladmin.html" id="adminLink" style="display:none">Painel Admin</a>
+    <a href="/login.html" id="loginLink">Entrar</a>
+    <a href="#" id="logoutLink" style="display:none">Sair</a>
+  </nav>
+  <div class="spacer"></div>
+
+  <main class="wrap">
+    <div class="gallery">
+      <div class="main-img" id="mainImgWrap"><img id="mainImg" alt="Produto"></div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+    <div>
+      <h1 class="title" id="pTitle">Produto</h1>
+      <div class="price" id="pPrice">R$ 0,00</div>
+      <p class="muted" id="pDesc"></p>
+      <div>
+        <div class="muted">Cores</div>
+        <div class="row" id="cores"></div>
+      </div>
+      <div>
+        <div class="muted">Tamanhos</div>
+        <div class="row" id="tamanhos"></div>
+      </div>
+      <div class="qty">
+        <button id="minus">-</button><span id="qtd">1</span><button id="plus">+</button>
+      </div>
+      <button class="buy" id="buyBtn">Comprar via WhatsApp</button>
+      <button class="chip" id="favBtn">♡ Favoritar</button>
+    </div>
+    <div class="video" id="videoWrap" style="display:none"></div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbGwo74XhjxyorPEvz3WHZgGV6BESGZw8",
+      authDomain: "supbaggy.firebaseapp.com",
+      databaseURL: "https://supbaggy-default-rtdb.firebaseio.com",
+      projectId: "supbaggy",
+      storageBucket: "supbaggy.firebasestorage.app",
+      messagingSenderId: "304795544101",
+      appId: "1:304795544101:web:5de2ecc82c07fd9fe42dcc"
+    };
+    const loadFirebase = async () => {
+      if (!window.firebaseApp) {
+        await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
+        await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics-compat.js")
+        ]);
+        window.firebaseApp = firebase.initializeApp(firebaseConfig);
+        try { window.firebaseAnalytics = firebase.analytics(); } catch(e) {}
+      }
+      return window.firebaseApp;
+    };
+    const adminEmail = "supremacybaggy@gmail.com";
+    function isAdmin(user){return !!user && user.email===adminEmail}
+
+    document.getElementById('menuBtn').addEventListener('click', ()=>{
+      document.getElementById('drawer').classList.toggle('open');
+    });
+    document.getElementById('logoutLink').addEventListener('click', async (e)=>{
+      e.preventDefault(); await loadFirebase(); await firebase.auth().signOut(); location.reload();
+    });
+
+    function money(n){return 'R$ '+Number(n||0).toFixed(2)}
+    function buildWA(product, qtd, cor, tam){
+      const frete = product.frete?.tipo==='fixo'? `R$${Number(product.frete.valor||0).toFixed(2)}` : (product.frete?.tipo==='gratis'? 'grátis' : 'a determinar');
+      const total = Number(product.price)*(qtd||1) + (product.frete?.tipo==='fixo'? Number(product.frete.valor||0):0);
+      const msg = `Produto: ${product.title}\nPreço: ${money(product.price)}\nQuantidade: ${qtd}\nFrete: ${frete}\nVariações: ${[tam||'', cor||''].filter(Boolean).join(', ')}\nTotal: ${money(total)}`;
+      return 'https://wa.me/559781084662?text='+encodeURIComponent(msg);
+    }
+
+    (async function(){
+      await loadFirebase();
+      const id = decodeURIComponent((location.hash||'').split('/')[1]||'');
+      const db = firebase.database();
+      const snap = await db.ref('products/'+id).get();
+      const p = snap.val();
+      if (!p){ document.title='Produto não encontrado'; document.querySelector('.wrap').innerHTML='<p class="muted">Produto não encontrado.</p>'; return; }
+      document.title = p.title+ ' • Supremacy Baggy';
+      document.getElementById('pTitle').textContent = p.title;
+      document.getElementById('pPrice').textContent = money(p.price);
+      document.getElementById('pDesc').textContent = p.description||'';
+      const imgs = Array.isArray(p.images) && p.images.length? p.images : ['https://i.imgur.com/ZMOggly.png'];
+      const mainImg = document.getElementById('mainImg');
+      mainImg.src = imgs[0]; mainImg.alt = p.title;
+      const thumbs = document.getElementById('thumbs');
+      imgs.forEach((src,i)=>{
+        const im = document.createElement('img'); im.src=src; im.alt=p.title+' '+(i+1); if(i===0) im.classList.add('active');
+        im.addEventListener('click', ()=>{ mainImg.src=src; thumbs.querySelectorAll('img').forEach(x=>x.classList.remove('active')); im.classList.add('active'); });
+        thumbs.appendChild(im);
+      });
+      const cores = p.variations?.cores||[]; const tam = p.variations?.tamanhos||[];
+      let selCor = cores[0]||null; let selTam = tam[0]||null; let qtd = 1;
+      const coresWrap = document.getElementById('cores'); const tamWrap = document.getElementById('tamanhos');
+      const renderSel = (arr, wrap, setter, cur)=>{
+        wrap.innerHTML=''; arr.forEach(v=>{ const c=document.createElement('button'); c.type='button'; c.className='chip'+(v===cur?' active':''); c.textContent=v; c.addEventListener('click',()=>{ setter(v); renderSel(arr,wrap,setter,v); }); wrap.appendChild(c); });
+      };
+      renderSel(cores, coresWrap, (v)=>selCor=v, selCor);
+      renderSel(tam, tamWrap, (v)=>selTam=v, selTam);
+      document.getElementById('minus').onclick=()=>{ if(qtd>1){qtd--; document.getElementById('qtd').textContent=String(qtd);} };
+      document.getElementById('plus').onclick=()=>{ qtd++; document.getElementById('qtd').textContent=String(qtd); };
+      document.getElementById('buyBtn').onclick=()=>{
+        try { firebaseAnalytics.logEvent('purchase_intent', {item_id:id}); } catch(e) {}
+        location.href = buildWA(p, qtd, selCor, selTam);
+      };
+      document.getElementById('favBtn').onclick=async()=>{
+        try { firebaseAnalytics.logEvent('wishlist_add', {item_id:id}); } catch(e) {}
+        const user = firebase.auth().currentUser; if(!user){ location.href='/login.html?redirect='+encodeURIComponent(location.pathname+location.hash); return; }
+        await db.ref('users/'+user.uid+'/wishlist/'+id).set(true);
+        alert('Adicionado aos favoritos');
+      };
+      if (p.video){
+        const v = document.getElementById('videoWrap');
+        v.style.display='block';
+        v.innerHTML = `<iframe src="${p.video}" title="Vídeo do produto" frameborder="0" allowfullscreen style="width:100%;height:100%"></iframe>`;
+      }
+
+      firebase.auth().onAuthStateChanged((user)=>{
+        document.getElementById('loginLink').style.display = user ? 'none':'block';
+        document.getElementById('logoutLink').style.display = user ? 'block':'none';
+        document.getElementById('adminLink').style.display = isAdmin(user) ? 'block':'none';
+      });
+      try { firebaseAnalytics.logEvent('view_product', {item_id:id}); } catch(e) {}
+    })();
+  </script>
+</body>
+</html>
+

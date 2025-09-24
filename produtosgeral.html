@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Produtos • Supremacy Baggy</title>
+  <meta name="description" content="Todos os produtos Supremacy Baggy">
+  <style>
+    :root{--bg:#000;--fg:#fff;--muted:#bfbfbf;--card:#0b0b0b;--border:#151515}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#000;color:#fff;font-family:Inter,system-ui}
+    a{color:#fff;text-decoration:none}
+    .top{position:fixed;inset:0 0 auto 0;height:56px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #111;z-index:10}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.8px}
+    .brand img{width:32px;height:32px;border-radius:4px;filter:grayscale(1)}
+    .menu-btn{width:40px;height:40px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;display:grid;place-items:center}
+    .drawer{position:fixed;inset:56px 0 0 auto;width:80%;max-width:360px;background:#0a0a0a;border-left:1px solid #111;transform:translateX(100%);transition:transform .28s ease;z-index:20}
+    .drawer.open{transform:translateX(0)}
+    .drawer a{display:block;padding:16px;border-bottom:1px solid #111}
+    .spacer{height:56px}
+    .wrap{padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .thumb{aspect-ratio:1/1;background:#090909;border-bottom:1px solid #151515}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .content{padding:12px}
+    .title{font-weight:800;font-size:14px;margin:0 0 6px}
+    .price{font-weight:700}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="https://i.imgur.com/ZMOggly.png" alt="Logo"><span>SUPREMACY BAGGY</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">≡</button>
+  </header>
+  <nav class="drawer" id="drawer" aria-label="Navegação">
+    <a href="/paginahome.html">Home</a>
+    <a href="/categorias.html">Categorias</a>
+    <a href="/favoritos.html">Favoritos</a>
+    <a href="/carrinho.html">Carrinho</a>
+    <a href="/perfil.html">Perfil</a>
+    <a href="/paineladmin.html" id="adminLink" style="display:none">Painel Admin</a>
+    <a href="/login.html" id="loginLink">Entrar</a>
+    <a href="#" id="logoutLink" style="display:none">Sair</a>
+  </nav>
+  <div class="spacer"></div>
+
+  <main class="wrap">
+    <h2 style="margin:8px 0 10px 0;font-size:16px">Todos os produtos</h2>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbGwo74XhjxyorPEvz3WHZgGV6BESGZw8",
+      authDomain: "supbaggy.firebaseapp.com",
+      databaseURL: "https://supbaggy-default-rtdb.firebaseio.com",
+      projectId: "supbaggy",
+      storageBucket: "supbaggy.firebasestorage.app",
+      messagingSenderId: "304795544101",
+      appId: "1:304795544101:web:5de2ecc82c07fd9fe42dcc"
+    };
+    const loadFirebase = async () => {
+      if (!window.firebaseApp) {
+        await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
+        await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics-compat.js")
+        ]);
+        window.firebaseApp = firebase.initializeApp(firebaseConfig);
+        try { window.firebaseAnalytics = firebase.analytics(); } catch(e) {}
+      }
+      return window.firebaseApp;
+    };
+    const adminEmail = "supremacybaggy@gmail.com";
+    function isAdmin(user){ return !!user && user.email===adminEmail; }
+    document.getElementById('menuBtn').addEventListener('click', ()=>{
+      document.getElementById('drawer').classList.toggle('open');
+    });
+    document.getElementById('logoutLink').addEventListener('click', async (e)=>{
+      e.preventDefault(); await loadFirebase(); await firebase.auth().signOut(); location.reload();
+    });
+
+    (async function(){
+      await loadFirebase();
+      const db = firebase.database();
+      firebase.auth().onAuthStateChanged(user=>{
+        document.getElementById('loginLink').style.display = user ? 'none':'block';
+        document.getElementById('logoutLink').style.display = user ? 'block':'none';
+        document.getElementById('adminLink').style.display = isAdmin(user) ? 'block':'none';
+      });
+      const grid = document.getElementById('grid');
+      db.ref('products').orderByChild('active').equalTo(true).on('value',(snap)=>{
+        grid.innerHTML='';
+        (Object.values(snap.val()||{})).forEach(p=>{
+          const a = document.createElement('a'); a.href='/produto.html#/'+encodeURIComponent(p.id); a.className='card';
+          a.innerHTML = `<div class='thumb'><img loading='lazy' src='${(p.images&&p.images[0])||"https://i.imgur.com/ZMOggly.png"}' alt='${p.title}'></div><div class='content'><div class='title'>${p.title}</div><div class='price'>R$ ${Number(p.price).toFixed(2)}</div></div>`;
+          grid.appendChild(a);
+        });
+      });
+      try { firebaseAnalytics.logEvent('product_list_view'); } catch(e) {}
+    })();
+  </script>
+</body>
+</html>
+
