@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Painel Admin • Supremacy Baggy</title>
+  <meta name="description" content="Administração da loja">
+  <style>
+    :root{--bg:#000;--fg:#fff;--muted:#bfbfbf;--card:#0b0b0b;--border:#151515}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#000;color:#fff;font-family:Inter,system-ui}
+    a{color:#fff;text-decoration:none}
+    input,textarea{width:100%;padding:10px 12px;border-radius:10px;background:#0a0a0a;border:1px solid #1c1c1c;color:#fff;outline:none}
+    input:focus,textarea:focus{border-color:#3a3a3a;box-shadow:0 0 0 4px rgba(255,255,255,0.04)}
+    label{font-size:12px;color:#d9d9d9;margin:14px 0 6px;display:block}
+    .top{position:fixed;inset:0 0 auto 0;height:56px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #111;z-index:10}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.8px}
+    .brand img{width:32px;height:32px;border-radius:4px;filter:grayscale(1)}
+    .menu-btn{width:40px;height:40px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;display:grid;place-items:center}
+    .drawer{position:fixed;inset:56px 0 0 auto;width:80%;max-width:360px;background:#0a0a0a;border-left:1px solid #111;transform:translateX(100%);transition:transform .28s ease;z-index:20}
+    .drawer.open{transform:translateX(0)}
+    .drawer a{display:block;padding:16px;border-bottom:1px solid #111}
+    .spacer{height:56px}
+    .wrap{padding:16px;display:grid;gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .row{display:grid;gap:10px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:860px){.grid{grid-template-columns:repeat(3,1fr)}}
+    .btn{padding:10px 12px;border-radius:10px;border:1px solid #fff;background:#fff;color:#000;font-weight:800;cursor:pointer}
+    table{width:100%;border-collapse:collapse}
+    th,td{border:1px solid #151515;padding:8px;text-align:left}
+    .muted{color:#bfbfbf}
+    .danger{background:#200;color:#fff;border-color:#511}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="https://i.imgur.com/ZMOggly.png" alt="Logo"><span>SUPREMACY BAGGY • ADMIN</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">≡</button>
+  </header>
+  <nav class="drawer" id="drawer" aria-label="Navegação">
+    <a href="/paginahome.html">Home</a>
+    <a href="/categorias.html">Categorias</a>
+    <a href="/favoritos.html">Favoritos</a>
+    <a href="/carrinho.html">Carrinho</a>
+    <a href="/perfil.html">Perfil</a>
+    <a href="/paineladmin.html" id="adminLink" style="display:block">Painel Admin</a>
+    <a href="#" id="logoutLink">Sair</a>
+  </nav>
+  <div class="spacer"></div>
+
+  <main class="wrap">
+    <div class="card">
+      <h2 style="margin:0 0 8px 0;font-size:16px">Configurações visuais</h2>
+      <label for="bannerUrl">URL do banner (home)</label>
+      <input id="bannerUrl" placeholder="https://..." aria-label="Banner URL">
+      <label for="logoUrl">URL do logo (cabeçalho)</label>
+      <input id="logoUrl" placeholder="https://..." aria-label="Logo URL">
+      <div style="margin-top:10px" class="row"><button class="btn" id="saveVisual">Salvar</button></div>
+      <p class="muted">Preview</p>
+      <div class="grid">
+        <div><img id="previewBanner" alt="Preview banner" style="width:100%;aspect-ratio:16/7;object-fit:contain;border:1px solid #151515;border-radius:12px"></div>
+        <div><img id="previewLogo" alt="Preview logo" style="width:100%;aspect-ratio:1/1;object-fit:contain;border:1px solid #151515;border-radius:12px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px 0;font-size:16px">Produto</h2>
+      <div class="grid">
+        <div class="row">
+          <label for="pId">ID</label>
+          <input id="pId" placeholder="(auto para novo)">
+          <label for="pTitle">Título</label>
+          <input id="pTitle">
+          <label for="pPrice">Preço</label>
+          <input id="pPrice" type="number" step="0.01">
+          <label for="pImages">Imagens (1 por linha)</label>
+          <textarea id="pImages" rows="5" placeholder="https://...\nhttps://..."></textarea>
+          <label for="pDesc">Descrição</label>
+          <textarea id="pDesc" rows="5"></textarea>
+        </div>
+        <div class="row">
+          <label for="pCategory">Categoria</label>
+          <input id="pCategory" placeholder="ex: moletons">
+          <label for="pCores">Cores (separadas por vírgula)</label>
+          <input id="pCores" placeholder="preto, branco">
+          <label for="pTamanhos">Tamanhos (separados por vírgula)</label>
+          <input id="pTamanhos" placeholder="P, M, G">
+          <label for="pVideo">URL do vídeo (embed)</label>
+          <input id="pVideo" placeholder="https://www.youtube.com/embed/...">
+          <label>Frete</label>
+          <div class="row">
+            <select id="pFreteTipo" style="padding:10px 12px;border-radius:10px;background:#0a0a0a;border:1px solid #1c1c1c;color:#fff">
+              <option value="gratis">grátis</option>
+              <option value="fixo">fixo</option>
+              <option value="determinar">a determinar</option>
+            </select>
+            <input id="pFreteValor" type="number" step="0.01" placeholder="valor (se fixo)">
+          </div>
+          <label><input type="checkbox" id="pActive"> Ativo</label>
+        </div>
+        <div class="row">
+          <button class="btn" id="save">Salvar / Atualizar</button>
+          <button class="btn danger" id="remove">Remover</button>
+          <button class="btn" id="novo">Novo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px 0;font-size:16px">Produtos</h2>
+      <table>
+        <thead><tr><th>Ativo</th><th>Título</th><th>Preço</th><th>Categoria</th><th>ID</th></tr></thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbGwo74XhjxyorPEvz3WHZgGV6BESGZw8",
+      authDomain: "supbaggy.firebaseapp.com",
+      databaseURL: "https://supbaggy-default-rtdb.firebaseio.com",
+      projectId: "supbaggy",
+      storageBucket: "supbaggy.firebasestorage.app",
+      messagingSenderId: "304795544101",
+      appId: "1:304795544101:web:5de2ecc82c07fd9fe42dcc"
+    };
+    const loadFirebase = async () => {
+      if (!window.firebaseApp) {
+        await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
+        await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics-compat.js")
+        ]);
+        window.firebaseApp = firebase.initializeApp(firebaseConfig);
+        try { window.firebaseAnalytics = firebase.analytics(); } catch(e) {}
+      }
+      return window.firebaseApp;
+    };
+    const adminEmail = "supremacybaggy@gmail.com";
+    const adminUidList = new Set([]); // opcional: IDs permitidos
+    function isAdmin(user){ return !!user && (user.email===adminEmail || adminUidList.has(user.uid)); }
+
+    document.getElementById('menuBtn').addEventListener('click', ()=>{
+      document.getElementById('drawer').classList.toggle('open');
+    });
+    document.getElementById('logoutLink').addEventListener('click', async (e)=>{
+      e.preventDefault(); await loadFirebase(); await firebase.auth().signOut(); location.href='/login.html';
+    });
+
+    function readForm(){
+      return {
+        id: document.getElementById('pId').value.trim(),
+        title: document.getElementById('pTitle').value.trim(),
+        price: Number(document.getElementById('pPrice').value||0),
+        images: document.getElementById('pImages').value.split(/\n+/).map(s=>s.trim()).filter(Boolean),
+        description: document.getElementById('pDesc').value,
+        category: document.getElementById('pCategory').value.trim(),
+        variations: {
+          cores: document.getElementById('pCores').value.split(',').map(s=>s.trim()).filter(Boolean),
+          tamanhos: document.getElementById('pTamanhos').value.split(',').map(s=>s.trim()).filter(Boolean)
+        },
+        video: document.getElementById('pVideo').value.trim(),
+        frete: { tipo: document.getElementById('pFreteTipo').value, valor: Number(document.getElementById('pFreteValor').value||0) },
+        active: document.getElementById('pActive').checked
+      };
+    }
+    function writeForm(p){
+      document.getElementById('pId').value = p.id||'';
+      document.getElementById('pTitle').value = p.title||'';
+      document.getElementById('pPrice').value = p.price||0;
+      document.getElementById('pImages').value = (p.images||[]).join('\n');
+      document.getElementById('pDesc').value = p.description||'';
+      document.getElementById('pCategory').value = p.category||'';
+      document.getElementById('pCores').value = (p.variations?.cores||[]).join(', ');
+      document.getElementById('pTamanhos').value = (p.variations?.tamanhos||[]).join(', ');
+      document.getElementById('pVideo').value = p.video||'';
+      document.getElementById('pFreteTipo').value = p.frete?.tipo||'determinar';
+      document.getElementById('pFreteValor').value = p.frete?.valor||0;
+      document.getElementById('pActive').checked = !!p.active;
+    }
+    function money(n){return 'R$ '+Number(n||0).toFixed(2)}
+
+    (async function(){
+      await loadFirebase();
+      const user = await new Promise(res=>firebase.auth().onAuthStateChanged(res));
+      if (!isAdmin(user)){
+        alert('Acesso restrito ao administrador.'); location.href='/login.html?redirect='+encodeURIComponent(location.pathname); return;
+      }
+      const db = firebase.database();
+      // Visual configs
+      const bannerEl = document.getElementById('bannerUrl');
+      const logoEl = document.getElementById('logoUrl');
+      const prevBanner = document.getElementById('previewBanner');
+      const prevLogo = document.getElementById('previewLogo');
+      const cfg = await db.ref('config').get();
+      const cv = cfg.val()||{};
+      bannerEl.value = cv.bannerUrl||''; logoEl.value = cv.logoUrl||'';
+      prevBanner.src = cv.bannerUrl||'https://i.imgur.com/ZMOggly.png';
+      prevLogo.src = cv.logoUrl||'https://i.imgur.com/ZMOggly.png';
+      document.getElementById('saveVisual').onclick=async()=>{
+        await db.ref('config').update({ bannerUrl: bannerEl.value.trim(), logoUrl: logoEl.value.trim() });
+        prevBanner.src = bannerEl.value.trim()||prevBanner.src;
+        prevLogo.src = logoEl.value.trim()||prevLogo.src;
+        alert('Configurações salvas');
+      };
+
+      // Products table
+      const list = document.getElementById('list');
+      const renderList = (all)=>{
+        list.innerHTML='';
+        Object.values(all||{}).forEach(p=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${p.active? '✔️':'❌'}</td><td>${p.title||''}</td><td>${money(p.price)}</td><td>${p.category||''}</td><td class='muted'>${p.id}</td>`;
+          tr.addEventListener('click', ()=>writeForm(p));
+          list.appendChild(tr);
+        });
+      };
+      const productsRef = db.ref('products');
+      productsRef.on('value', s=> renderList(s.val()));
+
+      // Form actions
+      document.getElementById('novo').onclick=()=>{
+        writeForm({active:true,frete:{tipo:'determinar',valor:0},variations:{cores:[],tamanhos:[]}});
+      };
+      document.getElementById('save').onclick=async()=>{
+        const data = readForm();
+        let id = data.id;
+        if (!id){ id = productsRef.push().key; data.id = id; }
+        await productsRef.child(id).set(data);
+        alert('Produto salvo');
+      };
+      document.getElementById('remove').onclick=async()=>{
+        const id = document.getElementById('pId').value.trim(); if(!id){ alert('Informe o ID para remover'); return; }
+        if (confirm('Remover produto?')){ await productsRef.child(id).remove(); alert('Removido'); }
+      };
+    })();
+  </script>
+</body>
+</html>
+

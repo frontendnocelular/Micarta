@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="Supremacy Baggy - Streetwear minimalista">
+  <title>Supremacy Baggy • Home</title>
+  <style>
+    :root{--bg:#000;--fg:#fff;--muted:#bfbfbf;--card:#0b0b0b;--border:#151515;--glow:0 0 0 2px rgba(255,255,255,.06),0 8px 24px rgba(255,255,255,.05)}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+    a{color:#fff;text-decoration:none}
+    img{max-width:100%;display:block}
+    .top{position:fixed;inset:0 0 auto 0;height:56px;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #111;z-index:50}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.8px}
+    .brand img{width:32px;height:32px;border-radius:4px;filter:grayscale(1)}
+    .menu-btn{width:40px;height:40px;border-radius:10px;border:1px solid #222;background:#0a0a0a;color:#fff;display:grid;place-items:center}
+    .drawer{position:fixed;inset:56px 0 0 auto;width:80%;max-width:360px;background:#0a0a0a;border-left:1px solid #111;transform:translateX(100%);transition:transform .28s ease;z-index:60}
+    .drawer.open{transform:translateX(0)}
+    .drawer a{display:block;padding:16px;border-bottom:1px solid #111}
+    .spacer{height:56px}
+    .hero{position:relative;height:56vh;min-height:360px;border-bottom:1px solid #111}
+    canvas#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+    .overlay-center{position:absolute;inset:auto 0 0 0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;background:linear-gradient(to top, rgba(0,0,0,.6), rgba(0,0,0,0))}
+    .banner{width:100%;max-width:1200px;aspect-ratio:16/7;background:#0b0b0b;border:1px solid #151515;border-radius:12px;overflow:hidden}
+    .banner img{width:100%;height:100%;object-fit:contain;filter:grayscale(1) contrast(1.05)}
+    .section{padding:20px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr);gap:16px}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .15s ease, box-shadow .2s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--glow)}
+    .thumb{aspect-ratio:1/1;background:#090909;border-bottom:1px solid #151515}
+    .thumb img{width:100%;height:100%;object-fit:cover}
+    .content{padding:12px}
+    .title{font-weight:800;font-size:14px;line-height:1.2;margin:0 0 6px}
+    .price{font-weight:700;color:#e6e6e6}
+    .muted{color:#bfbfbf;font-size:12px}
+    .fade-enter{opacity:0;transform:translateY(6px)}
+    .fade-enter.show{opacity:1;transform:none;transition:opacity .28s ease, transform .28s ease}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><img src="https://i.imgur.com/ZMOggly.png" alt="Logo"><span>SUPREMACY BAGGY</span></div>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">≡</button>
+  </header>
+  <nav class="drawer" id="drawer" aria-label="Navegação">
+    <a href="/paginahome.html">Home</a>
+    <a href="/categorias.html">Categorias</a>
+    <a href="/favoritos.html">Favoritos</a>
+    <a href="/carrinho.html">Carrinho</a>
+    <a href="/perfil.html">Perfil</a>
+    <a href="/paineladmin.html" id="adminLink" style="display:none">Painel Admin</a>
+    <a href="/login.html" id="loginLink">Entrar</a>
+    <a href="#" id="logoutLink" style="display:none">Sair</a>
+  </nav>
+  <div class="spacer"></div>
+
+  <section class="hero">
+    <canvas id="scene"></canvas>
+    <div class="overlay-center">
+      <div class="banner"><img id="bannerImg" alt="Banner Supremacy Baggy" loading="lazy"></div>
+    </div>
+  </section>
+
+  <main class="section">
+    <h2 style="margin:0 0 10px 0;font-size:16px;letter-spacing:.6px">Destaques</h2>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <script>
+    // Firebase inline init per page
+    const firebaseConfig = {
+      apiKey: "AIzaSyCbGwo74XhjxyorPEvz3WHZgGV6BESGZw8",
+      authDomain: "supbaggy.firebaseapp.com",
+      databaseURL: "https://supbaggy-default-rtdb.firebaseio.com",
+      projectId: "supbaggy",
+      storageBucket: "supbaggy.firebasestorage.app",
+      messagingSenderId: "304795544101",
+      appId: "1:304795544101:web:5de2ecc82c07fd9fe42dcc"
+    };
+
+    const loadFirebase = async () => {
+      if (!window.firebaseApp) {
+        const app = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js");
+        await Promise.all([
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"),
+          import("https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics-compat.js")
+        ]);
+        window.firebaseApp = firebase.initializeApp(firebaseConfig);
+        try { window.firebaseAnalytics = firebase.analytics(); } catch(e) {}
+      }
+      return window.firebaseApp;
+    };
+
+    const adminEmail = "supremacybaggy@gmail.com";
+    function isAdmin(user){ return !!user && user.email === adminEmail; }
+
+    // Load config (banner, header logo) and products
+    async function loadContent(){
+      await loadFirebase();
+      const db = firebase.database();
+      // Banner
+      firebase.database().ref('config/bannerUrl').on('value', (snap)=>{
+        const url = snap.val() || 'https://i.imgur.com/ZMOggly.png';
+        const bannerImg = document.getElementById('bannerImg');
+        bannerImg.src = url;
+        bannerImg.alt = 'Banner Supremacy Baggy';
+      });
+
+      // Seed one example product if empty
+      const productsRef = db.ref('products');
+      productsRef.once('value').then(s=>{
+        if (!s.exists()) {
+          const exampleId = productsRef.push().key;
+          const example = {
+            id: exampleId,
+            title: 'Moletom Oversized Supremacy',
+            price: 199.9,
+            images: ['https://images.unsplash.com/photo-1542060748-10c28b62716a?q=80&w=1000&auto=format&fit=crop'],
+            description: 'Moletom oversized preto minimalista, tecido premium.',
+            category: 'moletons',
+            variations: { cores: ['preto','branco'], tamanhos: ['P','M','G'] },
+            video: '',
+            frete: { tipo: 'gratis', valor: 0 },
+            active: true
+          };
+          db.ref('products/'+exampleId).set(example);
+        }
+      });
+
+      // Active products list
+      productsRef.orderByChild('active').equalTo(true).on('value', (snap)=>{
+        const grid = document.getElementById('grid');
+        grid.innerHTML='';
+        const val = snap.val() || {};
+        Object.values(val).forEach(p=>{
+          const card = document.createElement('a');
+          card.href = '/produto.html#/'+encodeURIComponent(p.id);
+          card.className = 'card fade-enter';
+          card.innerHTML = `
+            <div class="thumb"><img loading="lazy" src="${(p.images&&p.images[0])||'https://i.imgur.com/ZMOggly.png'}" alt="${p.title}"></div>
+            <div class="content">
+              <h3 class="title">${p.title}</h3>
+              <div class="price">R$ ${Number(p.price).toFixed(2)}</div>
+              <div class="muted">${(p.description||'').slice(0,60)}...</div>
+            </div>`;
+          grid.appendChild(card);
+          requestAnimationFrame(()=>card.classList.add('show'));
+        });
+      });
+
+      // Auth state for menu
+      firebase.auth().onAuthStateChanged((user)=>{
+        document.getElementById('loginLink').style.display = user ? 'none':'block';
+        document.getElementById('logoutLink').style.display = user ? 'block':'none';
+        document.getElementById('adminLink').style.display = isAdmin(user) ? 'block':'none';
+      });
+    }
+
+    // Three.js Splash graffiti particles
+    async function initSplash(){
+      const THREE = await import('https://unpkg.com/three@0.160.0/build/three.module.js');
+      const { OrbitControls } = await import('https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js');
+      const canvas = document.getElementById('scene');
+      const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+      camera.position.set(0,0,5);
+      const clock = new THREE.Clock();
+
+      // Particles background
+      const particles = new THREE.Group();
+      const pGeo = new THREE.BufferGeometry();
+      const COUNT = 600;
+      const positions = new Float32Array(COUNT*3);
+      for(let i=0;i<COUNT;i++){ positions[i*3+0]=(Math.random()-0.5)*10; positions[i*3+1]=(Math.random()-0.5)*5; positions[i*3+2]=(Math.random()-0.5)*6; }
+      pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+      const pMat = new THREE.PointsMaterial({color:0xffffff, size:0.02, transparent:true, opacity:0.6});
+      const points = new THREE.Points(pGeo, pMat);
+      scene.add(points);
+
+      // Logo plane (white) and spray reveal
+      const texLoader = new THREE.TextureLoader();
+      const logoTex = texLoader.load('https://i.imgur.com/ZMOggly.png');
+      const geo = new THREE.PlaneGeometry(3, 3);
+      const mat = new THREE.MeshBasicMaterial({map: logoTex, transparent:true, opacity:0});
+      const logo = new THREE.Mesh(geo, mat);
+      scene.add(logo);
+
+      // Spray animation params
+      let t=0; const DURATION = 2.2; let exploded=false;
+
+      function resize(){
+        const {clientWidth, clientHeight} = canvas;
+        renderer.setSize(clientWidth, clientHeight, false);
+        camera.aspect = clientWidth/clientHeight; camera.updateProjectionMatrix();
+      }
+      window.addEventListener('resize', resize); resize();
+
+      function animate(){
+        requestAnimationFrame(animate);
+        const dt = clock.getDelta();
+        t += dt;
+        // subtle background motion
+        const arr = pGeo.attributes.position.array;
+        for(let i=0;i<COUNT;i++){
+          arr[i*3+1] += Math.sin((t+i)*0.2)*0.0006; // gentle drift
+        }
+        pGeo.attributes.position.needsUpdate = true;
+
+        // Spray reveal: fade-in mask via opacity
+        if (t < DURATION) {
+          mat.opacity = Math.min(1, t/DURATION);
+        } else if (!exploded) {
+          // quick particle burst
+          for(let i=0;i<COUNT;i++){
+            arr[i*3+0]*=1.4; arr[i*3+1]*=1.4; arr[i*3+2]*=1.4;
+          }
+          exploded = true;
+          setTimeout(()=>{
+            document.querySelector('main').style.opacity='1';
+          }, 200);
+        }
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Home content starts hidden
+      document.querySelector('main').style.opacity='0';
+      setTimeout(()=>{ document.querySelector('main').style.transition='opacity .6s ease'; }, 50);
+    }
+
+    // Drawer
+    document.getElementById('menuBtn').addEventListener('click', ()=>{
+      document.getElementById('drawer').classList.toggle('open');
+    });
+    document.getElementById('logoutLink').addEventListener('click', async (e)=>{
+      e.preventDefault(); await loadFirebase(); await firebase.auth().signOut(); location.reload();
+    });
+
+    (async function start(){
+      await Promise.all([initSplash(), loadContent()]);
+      try { firebaseAnalytics.logEvent('homepage_view'); } catch(e) {}
+    })();
+  </script>
+</body>
+</html>
+
